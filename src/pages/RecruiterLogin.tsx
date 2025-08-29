@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { adminAuthService } from '@/lib/admin-auth';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
-import { Building2, ArrowLeft } from 'lucide-react';
+import { Users, ArrowLeft } from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -18,26 +18,26 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const AdminLogin = () => {
+const RecruiterLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const loginForm = useForm<LoginFormData>({
+  const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
 
-  const onLogin = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     try {
-      const user = await adminAuthService.adminSignIn(data.email, data.password);
+      const user = await adminAuthService.recruiterSignIn(data.email, data.password);
       if (user) {
         // Store user session
         localStorage.setItem('admin_user', JSON.stringify(user));
-        toast.success('Welcome back, Admin!');
-        navigate('/admin');
+        toast.success('Welcome back!');
+        navigate('/admin'); // Redirect to main admin area (will show recruiter dashboard)
       } else {
-        toast.error('Invalid admin credentials');
+        toast.error('Invalid credentials or account not found');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -64,25 +64,25 @@ const AdminLogin = () => {
         <Card className="shadow-xl border-0 bg-card/50 backdrop-blur-sm">
           <CardHeader className="text-center pb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-glow rounded-xl flex items-center justify-center mx-auto mb-4">
-              <Building2 className="w-6 h-6 text-primary-foreground" />
+              <Users className="w-6 h-6 text-primary-foreground" />
             </div>
-            <CardTitle className="text-2xl">MangosOrange Admin</CardTitle>
+            <CardTitle className="text-2xl">Recruiter Login</CardTitle>
             <CardDescription>
-              Admin Access Only
+              Access your recruiter dashboard
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
-                  control={loginForm.control}
+                  control={form.control}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Admin Email</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@mangosorange.com" {...field} />
+                        <Input placeholder="recruiter@mangosorange.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -90,7 +90,7 @@ const AdminLogin = () => {
                 />
 
                 <FormField
-                  control={loginForm.control}
+                  control={form.control}
                   name="password"
                   render={({ field }) => (
                     <FormItem>
@@ -104,16 +104,16 @@ const AdminLogin = () => {
                 />
 
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Sign In as Admin'}
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
             </Form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-800">
-                Recruiter?{' '}
-                <Link to="/login" className="text-primary hover:underline">
-                  Recruiter Login
+                Need admin access?{' '}
+                <Link to="/admin/login" className="text-primary hover:underline">
+                  Admin Login
                 </Link>
               </p>
             </div>
@@ -124,4 +124,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default RecruiterLogin;

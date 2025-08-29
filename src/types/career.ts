@@ -35,8 +35,9 @@ export interface Admin {
   id: string;
   email: string;
   name: string;
-  role: 'Admin' | 'Recruiter';
+  role: 'admin' | 'recruiter';
   createdAt: string;
+  isActive?: boolean;
 }
 
 export interface DashboardStats {

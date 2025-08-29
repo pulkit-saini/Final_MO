@@ -8,9 +8,10 @@ import {
   Settings, 
   LogOut,
   Menu,
-  X
+  X,
+  UserPlus
 } from 'lucide-react';
-import { authService } from '@/lib/auth';
+import { adminAuthService } from '@/lib/admin-auth';
 import { Admin } from '@/types/career';
 import { toast } from 'sonner';
 
@@ -30,19 +31,29 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }, []);
 
   const checkAuth = async () => {
-    const currentUser = await authService.getCurrentUser();
+    const currentUser = await adminAuthService.getCurrentUser();
     if (currentUser) {
       setUser(currentUser);
     } else {
-      navigate('/admin/login');
+      // Redirect based on role
+      if (window.location.pathname.startsWith('/admin')) {
+        navigate('/admin/login');
+      } else {
+        navigate('/login');
+      }
     }
     setLoading(false);
   };
 
   const handleSignOut = async () => {
-    await authService.signOut();
+    await adminAuthService.signOut();
     setUser(null);
-    navigate('/admin/login');
+    // Redirect to appropriate login page
+    if (user?.role === 'admin') {
+      navigate('/admin/login');
+    } else {
+      navigate('/login');
+    }
     toast.success('Signed out successfully');
   };
 
@@ -50,6 +61,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Job Postings', href: '/admin/jobs', icon: Briefcase },
     { name: 'Applicants', href: '/admin/applicants', icon: Users },
+    ...(user?.role === 'admin' ? [
+      { name: 'Manage Recruiters', href: '/admin/recruiters', icon: UserPlus },
+    ] : []),
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

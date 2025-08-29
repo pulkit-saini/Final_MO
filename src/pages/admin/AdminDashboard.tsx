@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AdminLayout from '@/components/admin/AdminLayout';
+import RecruiterManagement from '@/components/admin/RecruiterManagement';
+import { adminAuthService } from '@/lib/admin-auth';
 import { careerAPI } from '@/lib/career-api';
 import { DashboardStats } from '@/types/career';
 import { 
@@ -11,10 +14,14 @@ import {
   TrendingUp,
   Calendar,
   Mail,
-  Phone
+  Phone,
+  UserPlus,
+  Shield
 } from 'lucide-react';
 
 const AdminDashboard = () => {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showRecruiterManagement, setShowRecruiterManagement] = useState(false);
   const [stats, setStats] = useState<DashboardStats>({
     totalJobs: 0,
     activeJobs: 0,
@@ -25,8 +32,14 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    checkAdminStatus();
     loadStats();
   }, []);
+
+  const checkAdminStatus = async () => {
+    const adminStatus = await adminAuthService.isCurrentUserAdmin();
+    setIsAdmin(adminStatus);
+  };
 
   const loadStats = async () => {
     try {
@@ -80,16 +93,71 @@ const AdminDashboard = () => {
     );
   }
 
+  if (showRecruiterManagement) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowRecruiterManagement(false)}
+            >
+              ← Back to Dashboard
+            </Button>
+          </div>
+          <RecruiterManagement />
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-gray-800">
-            Overview of your career management system
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-gray-800">
+                Overview of your career management system
+              </p>
+            </div>
+            {isAdmin && (
+              <Button 
+                onClick={() => setShowRecruiterManagement(true)}
+                className="gap-2"
+              >
+                <UserPlus className="w-4 h-4" />
+                Manage Recruiters
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Admin-only section */}
+        {isAdmin && (
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <Shield className="w-5 h-5" />
+                Admin Controls
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  onClick={() => setShowRecruiterManagement(true)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Users className="w-4 h-4" />
+                  Manage Recruiters
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

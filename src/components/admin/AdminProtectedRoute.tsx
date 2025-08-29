@@ -3,12 +3,12 @@ import { Navigate } from 'react-router-dom';
 import { adminAuthService } from '@/lib/admin-auth';
 import { Admin } from '@/types/career';
 
-interface ProtectedRouteProps {
+interface AdminProtectedRouteProps {
   children: React.ReactNode;
-  requireAdmin?: boolean;
+  requireAdmin?: boolean; // If true, only admins can access
 }
 
-const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps) => {
+const AdminProtectedRoute = ({ children, requireAdmin = false }: AdminProtectedRouteProps) => {
   const [user, setUser] = useState<Admin | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,14 +36,16 @@ const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRouteProps)
   }
 
   if (!user) {
+    // No user logged in - redirect to appropriate login
     return <Navigate to="/login" replace />;
   }
 
   if (requireAdmin && user.role !== 'admin') {
+    // User is not admin but admin access required
     return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default AdminProtectedRoute;

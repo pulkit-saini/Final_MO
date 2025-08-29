@@ -35,6 +35,9 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminJobs from "./pages/admin/AdminJobs";
 import AdminApplicants from "./pages/admin/AdminApplicants";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminRecruiterManagement from "./pages/admin/AdminRecruiterManagement";
+import RecruiterLogin from "./pages/RecruiterLogin";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -78,10 +81,34 @@ const App = () => (
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/jobs" element={<AdminJobs />} />
-          <Route path="/admin/applicants" element={<AdminApplicants />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin" element={
+            <AdminProtectedRoute>
+              <AdminDashboard />
+            </AdminProtectedRoute>
+          } />
+          <Route path="/admin/jobs" element={
+            <AdminProtectedRoute>
+              <AdminJobs />
+            </AdminProtectedRoute>
+          } />
+          <Route path="/admin/applicants" element={
+            <AdminProtectedRoute>
+              <AdminApplicants />
+            </AdminProtectedRoute>
+          } />
+          <Route path="/admin/recruiters" element={
+            <AdminProtectedRoute requireAdmin={true}>
+              <AdminRecruiterManagement />
+            </AdminProtectedRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <AdminProtectedRoute>
+              <AdminSettings />
+            </AdminProtectedRoute>
+          } />
+          
+          {/* Recruiter Login */}
+          <Route path="/login" element={<RecruiterLogin />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
